@@ -28,13 +28,13 @@
     .screen {
       width: 320px;
       height: 480px;
-      background: url('assets/lock_wallpaper.png') center/cover;
       overflow: hidden;
       position: absolute;
       top: 50%;
       left: 50%;
       margin-left: -160px;
       margin-top: -240px;
+      -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
     }
 
@@ -42,6 +42,11 @@
       width: 100%;
       height: 100%;
       position: relative;
+      background-image: url('assets/lock_wallpaper.png');
+      background-position: center center;
+      -webkit-background-size: cover;
+      background-size: cover;
+      background-repeat: no-repeat;
     }
 
     /* Status Bar */
@@ -85,8 +90,8 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      margin-left: -6px;
-      margin-top: -6px;
+      margin-left: -5px;
+      margin-top: -5px;
     }
 
     .status-center img {
@@ -101,6 +106,7 @@
       top: 20px;
       left: 0;
       right: 0;
+      width: 100%;
       text-align: center;
       color: white;
       background: -webkit-gradient(linear, left top, left bottom,

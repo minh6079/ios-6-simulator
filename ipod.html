@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iOS 6 Lock Screen</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Screen */
+    .screen {
+      width: 320px;
+      height: 480px;
+      background: url('assets/lock_wallpaper.png') center/cover;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .lockscreen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      position: relative;
+      /* for absolute center */
+      height: 20px;
+      padding: 0 6px;
+      font-size: 12px;
+      color: white;
+      font-weight: 600;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    /* Left: float + 1px spacing */
+    .status-left {
+      float: left;
+      display: inline-block;
+      line-height: 20px;
+    }
+
+    .status-left .status-icon {
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 1px;
+      /* 1px padding between icons */
+    }
+
+    /* Right: float, no spacing */
+    .status-right {
+      float: right;
+      display: inline-block;
+      line-height: 20px;
+    }
+
+    /* Center: absolute, centered */
+    .status-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: inline-block;
+      line-height: 20px;
+    }
+
+    .status-center .status-icon {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+
+    /* Clock */
+    .clock-container {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: white;
+      text-align: center;
+      background: linear-gradient(to bottom,
+          rgba(200, 200, 200, 0.15) 0%,
+          rgba(200, 200, 200, 0.15) 50%,
+          rgba(0, 0, 0, 0.20) 50%,
+          rgba(0, 0, 0, 0.20) 100%);
+      padding: 12px 0;
+      display: -webkit-box;
+      /* old flexbox */
+      -webkit-box-orient: vertical;
+      /* flex-direction: column */
+      -webkit-box-align: center;
+      /* align-items: center */
+      -webkit-box-pack: center;
+      /* justify-content: center */
+    }
+
+    .time {
+      font-size: 65px;
+      font-weight: 100;
+      letter-spacing: -2px;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
+      line-height: 1;
+    }
+
+    .date {
+      font-size: 16px;
+      font-weight: 500;
+      margin-top: 2px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Slider Container */
+    .slider-container {
+      position: absolute;
+      bottom: 12px;
+      left: 8px;
+      right: 56px;
+    }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 69px;
+      background: rgba(31, 31, 31, 0.75);
+      pointer-events: none;
+    }
+
+
+
+    .slider-track {
+      position: relative;
+      height: 45px;
+      background: linear-gradient(180deg,
+          rgba(13, 13, 13, 0.75) 0%,
+          rgba(31, 31, 31, 0.75) 50%,
+          rgba(13, 13, 13, 0.75) 100%);
+      background: -webkit-linear-gradient(top, rgba(13, 13, 13, 0.75) 0%, rgba(31, 31, 31, 0.75) 50%, rgba(13, 13, 13, 0.75) 100%);
+      background: linear-gradient(180deg, rgba(13, 13, 13, 0.75) 0%, rgba(31, 31, 31, 0.75) 50%, rgba(13, 13, 13, 0.75) 100%);
+      border-radius: 10px;
+      border: 1.5px solid rgba(15, 15, 15, 0.9);
+      box-shadow:
+        inset 0 1px 3px rgba(0, 0, 0, 0.8),
+        0 0.5px 0 rgba(255, 255, 255, 0.15);
+      overflow: visible;
+    }
+
+    .slider-text {
+      position: absolute;
+      left: 25px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 20px;
+      font-weight: 400;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+      letter-spacing: 0.3px;
+      -webkit-transition-property: opacity;
+      transition-property: opacity;
+      -webkit-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+    }
+
+    .slider-button {
+      position: absolute;
+      left: 1px;
+      bottom: 1px;
+      width: 56px;
+      height: 42px;
+      background: linear-gradient(180deg, #fcfcfc 0%, #e8e8e8 50%, #d4d4d4 100%);
+      border-radius: 8px;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-transition-property: -webkit-transform;
+      transition-property: transform;
+      -webkit-transition-duration: 0s;
+      transition-duration: 0s;
+      border: 0.5px solid rgba(0, 0, 0, 0.15);
+      background-image: url('assets/arrow.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .slider-button:active {
+      cursor: grabbing;
+    }
+
+    /* Camera Button */
+    .camera-button {
+      position: absolute;
+      bottom: 12px;
+      right: 8px;
+      width: 44px;
+      height: 45px;
+      background: rgba(0, 0, 0, 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .camera-icon {
+      width: 42px;
+      height: 45px;
+      background: url('assets/camera.png') center/contain no-repeat;
+    }
+
+    .unlocked {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 28px;
+      font-weight: 300;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="screen">
+    <div class="lockscreen">
+      <div class="bottom-bar"></div>
+      <div class="status-bar">
+        <div class="status-left">
+          <img src="assets/airplane.png" class="status-icon" alt="Plane Icon">
+          <img src="assets/wifi.png" class="status-icon" alt="Wifi Icon">
+        </div>
+        <div class="status-center">
+          <img src="assets/dnd.png" class="status-icon" alt="Do not disturb icon">
+        </div>
+        <div class="status-right">
+          <img src="assets/lock.png" class="status-icon" alt="Lock Orientation Icon">
+          <img src="assets/alarm.png" class="status-icon" alt="Alarm Icon">
+          <img src="assets/battery.png" class="status-icon" alt="Battery Icon">
+        </div>
+      </div>
+
+      <div class="clock-container">
+        <div class="time" id="time">21:44</div>
+        <div class="date" id="date">Wednesday, December 10</div>
+      </div>
+
+      <div class="slider-container">
+        <div class="slider-track" id="sliderTrack">
+          <div class="slider-text" id="sliderText">slide to unlock</div>
+          <div class="slider-button" id="sliderButton">
+            <div class="slider-arrow"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="camera-button">
+        <div class="camera-icon"></div>
+      </div>
+
+      <div class="unlocked" id="unlocked">Unlocked!</div>
+    </div>
+  </div>
+
+  <script>
+    // Update clock
+    function updateClock() {
+      var now = new Date();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+
+      hours = hours < 10 ? '0' + hours : hours;
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+
+      document.getElementById('time').textContent = hours + ':' + minutes;
+
+      var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      var months = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+
+      var dayName = days[now.getDay()];
+      var monthName = months[now.getMonth()];
+      var date = now.getDate();
+
+      document.getElementById('date').textContent = dayName + ', ' + monthName + ' ' + date;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Animated gradient shine effect
+    var step;
+    var sliderText = document.getElementById('sliderText');
+    var ival = null;
+
+    function getGradient(bits) {
+      var lastPos = -10000;
+      var lastAlpha = -10000;
+      var ret = '-webkit-gradient(linear, left bottom, right bottom, ';
+      var stops = '';
+      var on = false;
+
+      for (var i = 0; i < bits.length; i += 2) {
+        var pos = bits[i];
+        var alpha = bits[i + 1];
+
+        if (!on && pos >= 0) {
+          var from = (alpha * (0 - lastPos) - lastAlpha * (0 - pos)) / (pos - lastPos);
+          ret += 'from(rgba(255,255,255,' + from + ')), ';
+          on = true;
+        }
+
+        if (on) {
+          if (pos >= 1) {
+            var to = (alpha * (1 - lastPos) - lastAlpha * (1 - pos)) / (pos - lastPos);
+            ret += 'to(rgba(255,255,255,' + to + '))';
+            ret += stops;
+            break;
+          }
+          stops += ', color-stop(' + pos + ', rgba(255,255,255,' + alpha + '))';
+        }
+        lastPos = pos;
+        lastAlpha = alpha;
+      }
+      return ret + ')';
+    }
+
+    function turnOn() {
+      if (ival) return;
+      step = -0.15;
+      ival = setInterval(function () {
+        step = (step + 0.05) % 1.55;
+        var wleft = step - 0.15;
+        var wright = step;
+        var gleft = wleft - 0.2;
+        var gright = wright + 0.2;
+        var s = getGradient([-1000, 0.6, gleft, 0.6, wleft, 1.0, wright, 1.0, gright, 0.6, 1000, 0.6]);
+        sliderText.style.webkitMaskImage = s;
+      }, 50);
+    }
+
+    function turnOff() {
+      if (!ival) return;
+      clearInterval(ival);
+      ival = null;
+      sliderText.style.webkitMaskImage = '';
+    }
+
+    // Slider functionality
+    var sliderButton = document.getElementById('sliderButton');
+    var sliderTrack = document.getElementById('sliderTrack');
+    var unlocked = document.getElementById('unlocked');
+    var left = 0;
+    var startX = null;
+    var startLeft = 0;
+    var maxLeft = 0;
+
+    function setLeft(leftVal) {
+      left = leftVal;
+      sliderButton.style.left = leftVal + 'px';
+
+      // Ensure maxLeft is not zero (for page load)
+      var half = (maxLeft > 0 ? maxLeft : sliderTrack.clientWidth - sliderButton.clientWidth - 4) / 2;
+      if (maxLeft === 0) maxLeft = half * 2; // store proper maxLeft
+
+      // Fade text to black in the first half of the slider
+      var opacity;
+      if (leftVal >= half) {
+        opacity = 0; // fully black after middle
+      } else {
+        opacity = 1 - (leftVal / half); // fade from 1 → 0 until middle
+      }
+
+      sliderText.style.opacity = opacity;
+    }
+
+    function unlock() {
+      turnOff();
+      sliderText.style.display = 'none';
+      unlocked.style.display = 'block';
+
+      setTimeout(function () {
+        sliderButton.style.webkitTransitionProperty = '-webkit-transform';
+        sliderButton.style.webkitTransitionDuration = '0.5s';
+        sliderButton.style.webkitTransform = 'translateX(0px)';
+        sliderButton.style.left = '2px';
+        sliderText.style.display = 'flex';
+        sliderText.style.opacity = '1';
+        unlocked.style.display = 'none';
+        left = 0;
+        turnOn();
+      }, 1500);
+    }
+
+    function handleStart(e) {
+      startX = e.type.indexOf('touch') !== -1 ? e.touches[0].clientX : e.clientX;
+      startLeft = left;
+      turnOff();
+      sliderButton.style.webkitTransitionProperty = '';
+      sliderButton.style.webkitTransitionDuration = '0s';
+      sliderText.style.webkitTransitionProperty = '';
+      sliderText.style.webkitTransitionDuration = '0s';
+      maxLeft = sliderTrack.clientWidth - sliderButton.clientWidth - 4;
+      return false;
+    }
+
+    function handleMove(e) {
+      if (startX === null) return;
+
+      var clientX = e.type.indexOf('touch') !== -1 ? e.touches[0].clientX : e.clientX;
+      var diff = clientX - startX;
+
+      if (diff < 0) diff = 0;
+      else if (diff >= maxLeft) diff = maxLeft;
+
+      setLeft(diff + startLeft);
+    }
+
+    function handleEnd() {
+      if (startX === null) return;
+      startX = null;
+
+      if (maxLeft - left < 15) {
+        unlock();
+        return false;
+      }
+
+      turnOn();
+      sliderText.style.webkitTransitionProperty = 'opacity';
+      sliderText.style.webkitTransitionDuration = '0.5s';
+      var leftVal = left;
+      setLeft(0);
+      sliderButton.style.webkitTransform = 'translateX(' + leftVal + 'px)';
+
+      setTimeout(function () {
+        sliderButton.style.webkitTransitionProperty = '-webkit-transform';
+        sliderButton.style.webkitTransitionDuration = '0.5s';
+        sliderButton.style.webkitTransform = 'translateX(0px)';
+      }, 0);
+
+      return false;
+    }
+
+    // Mouse events
+    sliderButton.addEventListener('mousedown', handleStart);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+
+    // Touch events
+    sliderButton.addEventListener('touchstart', handleStart);
+    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleEnd);
+
+    // Initialize
+    setLeft(0);
+    turnOn();
+  </script>
+</body>
+
+</html>
